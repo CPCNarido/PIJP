@@ -194,25 +194,19 @@ $tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, ava
                 </td>
                 <td><?php echo $tank['active'] ? 'Yes' : 'No'; ?></td>
                 <td>
-                    <form method="post" class="form" style="gap:6px">
+                    <form method="post" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-width: 320px;">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="id" value="<?php echo e((string) $tank['id']); ?>">
-                        <input class="input" type="number" step="0.01" name="price" value="<?php echo e((string) $tank['price']); ?>" required>
-                        <input class="input" type="number" name="available_qty" value="<?php echo e((string) $tank['available_qty']); ?>" required>
-                        <label>
+                        <input class="input" type="number" step="0.01" name="price" value="<?php echo e((string) $tank['price']); ?>" required style="width: 90px; font-size: 13px; padding: 6px 10px;" placeholder="Price">
+                        <input class="input" type="number" name="available_qty" value="<?php echo e((string) $tank['available_qty']); ?>" required style="width: 70px; font-size: 13px; padding: 6px 10px;" placeholder="Qty">
+                        <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap;">
                             <input type="checkbox" name="active" <?php echo $tank['active'] ? 'checked' : ''; ?>> Active
                         </label>
-                        <button class="button" type="submit">Save</button>
-                    </form>
-                    <form method="post" style="display: inline-block;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" value="<?php echo e((string) $tank['id']); ?>">
-                        <button class="button danger" data-confirm="Retire this product? It will be hidden but preserved for order history." type="submit">Retire</button>
-                    </form>
-                    <form method="post" style="display: inline-block;">
-                        <input type="hidden" name="action" value="permanent_delete">
-                        <input type="hidden" name="id" value="<?php echo e((string) $tank['id']); ?>">
-                        <button class="button danger" data-confirm="PERMANENTLY DELETE this product? This cannot be undone and will fail if used in orders." type="submit" style="background: #991b1b;">Delete</button>
+                        <button class="button" type="submit" style="font-size: 12px; padding: 6px 14px;">Save</button>
+                        <div style="width: 100%; display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button type="submit" class="button danger" name="action" value="delete" data-confirm="Retire this product? It will be hidden but preserved for order history." style="font-size: 12px; padding: 6px 12px; flex: 1; min-width: 80px;">Retire</button>
+                            <button type="submit" class="button danger" name="action" value="permanent_delete" data-confirm="PERMANENTLY DELETE this product? This cannot be undone and will fail if used in orders." style="background: #991b1b; font-size: 12px; padding: 6px 12px; flex: 1; min-width: 80px;">Delete</button>
+                        </div>
                     </form>
                 </td>
             </tr>
