@@ -840,3 +840,55 @@ textarea:focus {
         min-height: 260px;
     }
 }
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.filter-tab:hover {
+    background: rgba(230, 81, 0, 0.08);
+    color: var(--primary);
+}
+
+.filter-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(230, 81, 0, 0.25);
+}
+
+.filter-tab .count {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.filter-tab.active .count {
+    background: rgba(255, 255, 255, 0.25);
+}

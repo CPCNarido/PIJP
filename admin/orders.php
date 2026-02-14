@@ -5,6 +5,13 @@ require_once __DIR__ . '/../db.php';
 
 $pdo = db();
 
+// Get filter from URL (default to 'active' which excludes delivered)
+$filter = $_GET['status'] ?? 'active';
+$allowedFilters = ['all', 'active', 'pending', 'approved', 'in_delivery', 'delivered'];
+if (!in_array($filter, $allowedFilters)) {
+    $filter = 'active';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order_id = (int) ($_POST['order_id'] ?? 0);
     $status = $_POST['status'] ?? '';
@@ -39,25 +46,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         set_flash('success', 'Order updated.');
-        redirect('/admin/orders.php');
+        redirect('/admin/orders.php?status=' . $filter);
     }
 }
 
-$orders = $pdo->query(
-    "SELECT o.id, o.status, o.delivery_address, o.created_at, o.source, o.staff_id, u.name AS user_name, o.customer_name,
+// Build query based on filter
+$query = "SELECT o.id, o.status, o.delivery_address, o.created_at, o.source, o.staff_id, u.name AS user_name, o.customer_name,
             i.qty, i.unit_price, g.name AS tank_name, s.name AS staff_name, s.phone
      FROM orders o
      JOIN order_items i ON i.order_id = o.id
      JOIN gas_tanks g ON g.id = i.gas_tank_id
      LEFT JOIN users u ON u.id = o.user_id
-     LEFT JOIN staff s ON s.id = o.staff_id
-     ORDER BY o.created_at DESC"
+     LEFT JOIN staff s ON s.id = o.staff_id";
+
+if ($filter === 'active') {
+    // Show all orders except delivered
+    $query .= " WHERE o.status != 'delivered'";
+} elseif ($filter !== 'all') {
+    // Show specific status
+    $query .= " WHERE o.status = :status";
+}
+
+$query .= " ORDER BY o.created_at DESC";
+
+$stmt = $pdo->prepare($query);
+if ($filter !== 'all' && $filter !== 'active') {
+    $stmt->execute(['status' => $filter]);
+} else {
+    $stmt->execute();
+}
+$orders = $stmt->fetchAll();
+
+// Get counts for each status
+$countsResult = $pdo->query(
+    "SELECT status, COUNT(*) as count FROM orders GROUP BY status"
 )->fetchAll();
+$counts = ['all' => 0, 'active' => 0, 'pending' => 0, 'approved' => 0, 'in_delivery' => 0, 'delivered' => 0];
+foreach ($countsResult as $row) {
+    $counts[$row['status']] = (int) $row['count'];
+    $counts['all'] += (int) $row['count'];
+    if ($row['status'] !== 'delivered') {
+        $counts['active'] += (int) $row['count'];
+    }
+}
 
 $staff = $pdo->query('SELECT id, name, phone FROM staff WHERE active = 1 ORDER BY name')->fetchAll();
 ?>
 
 <h2 class="section-title">Approve and Track Orders</h2>
+
+<div class="filter-tabs">
+    <a href="?status=active" class="filter-tab <?php echo $filter === 'active' ? 'active' : ''; ?>">
+        Active <span class="count"><?php echo $counts['active']; ?></span>
+    </a>
+    <a href="?status=all" class="filter-tab <?php echo $filter === 'all' ? 'active' : ''; ?>">
+        All <span class="count"><?php echo $counts['all']; ?></span>
+    </a>
+    <a href="?status=pending" class="filter-tab <?php echo $filter === 'pending' ? 'active' : ''; ?>">
+        Pending <span class="count"><?php echo $counts['pending']; ?></span>
+    </a>
+    <a href="?status=approved" class="filter-tab <?php echo $filter === 'approved' ? 'active' : ''; ?>">
+        Approved <span class="count"><?php echo $counts['approved']; ?></span>
+    </a>
+    <a href="?status=in_delivery" class="filter-tab <?php echo $filter === 'in_delivery' ? 'active' : ''; ?>">
+        In Delivery <span class="count"><?php echo $counts['in_delivery']; ?></span>
+    </a>
+    <a href="?status=delivered" class="filter-tab <?php echo $filter === 'delivered' ? 'active' : ''; ?>">
+        Delivered <span class="count"><?php echo $counts['delivered']; ?></span>
+    </a>
+</div>
 
 <table class="table">
     <thead>

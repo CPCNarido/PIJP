@@ -5,17 +5,48 @@ require_once __DIR__ . '/../db.php';
 
 $pdo = db();
 
-$stmt = $pdo->prepare(
-    'SELECT o.id, o.status, o.delivery_address, o.created_at, i.qty, i.unit_price, g.name, s.name as staff_name, s.phone
+// Get filter from URL
+$filter = $_GET['status'] ?? 'all';
+$allowedFilters = ['all', 'pending', 'approved', 'in_delivery', 'delivered'];
+if (!in_array($filter, $allowedFilters)) {
+    $filter = 'all';
+}
+
+// Build query based on filter
+$query = 'SELECT o.id, o.status, o.delivery_address, o.created_at, i.qty, i.unit_price, g.name, s.name as staff_name, s.phone
      FROM orders o
      JOIN order_items i ON i.order_id = o.id
      JOIN gas_tanks g ON g.id = i.gas_tank_id
      LEFT JOIN staff s ON s.id = o.staff_id
-     WHERE o.user_id = :user_id
-     ORDER BY o.created_at DESC'
-);
-$stmt->execute(['user_id' => $_SESSION['user_id']]);
+     WHERE o.user_id = :user_id';
+
+if ($filter !== 'all') {
+    $query .= ' AND o.status = :status';
+}
+
+$query .= ' ORDER BY o.created_at DESC';
+
+$stmt = $pdo->prepare($query);
+$params = ['user_id' => $_SESSION['user_id']];
+if ($filter !== 'all') {
+    $params['status'] = $filter;
+}
+$stmt->execute($params);
 $orders = $stmt->fetchAll();
+
+// Get counts for each status
+$countsStmt = $pdo->prepare(
+    'SELECT o.status, COUNT(*) as count
+     FROM orders o
+     WHERE o.user_id = :user_id
+     GROUP BY o.status'
+);
+$countsStmt->execute(['user_id' => $_SESSION['user_id']]);
+$counts = ['all' => 0, 'pending' => 0, 'approved' => 0, 'in_delivery' => 0, 'delivered' => 0];
+foreach ($countsStmt->fetchAll() as $row) {
+    $counts[$row['status']] = (int) $row['count'];
+    $counts['all'] += (int) $row['count'];
+}
 
 $events = [];
 if ($orders) {
@@ -30,6 +61,24 @@ if ($orders) {
 ?>
 
 <h2 class="section-title">My Orders</h2>
+
+<div class="filter-tabs">
+    <a href="?status=all" class="filter-tab <?php echo $filter === 'all' ? 'active' : ''; ?>">
+        All <span class="count"><?php echo $counts['all']; ?></span>
+    </a>
+    <a href="?status=pending" class="filter-tab <?php echo $filter === 'pending' ? 'active' : ''; ?>">
+        Pending <span class="count"><?php echo $counts['pending']; ?></span>
+    </a>
+    <a href="?status=approved" class="filter-tab <?php echo $filter === 'approved' ? 'active' : ''; ?>">
+        Approved <span class="count"><?php echo $counts['approved']; ?></span>
+    </a>
+    <a href="?status=in_delivery" class="filter-tab <?php echo $filter === 'in_delivery' ? 'active' : ''; ?>">
+        In Delivery <span class="count"><?php echo $counts['in_delivery']; ?></span>
+    </a>
+    <a href="?status=delivered" class="filter-tab <?php echo $filter === 'delivered' ? 'active' : ''; ?>">
+        Delivered <span class="count"><?php echo $counts['delivered']; ?></span>
+    </a>
+</div>
 
 <?php if (!$orders): ?>
     <div class="card">No orders yet. Place one from your dashboard.</div>
