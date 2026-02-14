@@ -59,6 +59,7 @@ a:hover {
     top: 0;
     z-index: 1000;
     backdrop-filter: blur(14px);
+    transition: backdrop-filter 0.3s ease;
 }
 
 .brand {
@@ -148,6 +149,7 @@ a:hover {
     padding: 52px 6vw 80px;
     max-width: 1200px;
     margin: 0 auto;
+    transition: filter 0.3s ease;
 }
 
 .hero {
@@ -919,7 +921,7 @@ textarea:focus {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.3);
+        background: transparent;
         z-index: 1000;
         opacity: 0;
         pointer-events: none;
@@ -929,6 +931,15 @@ textarea:focus {
     body.menu-open::before {
         opacity: 1;
         pointer-events: auto;
+    }
+
+    body.menu-open .page {
+        filter: blur(6px);
+        pointer-events: none;
+    }
+
+    body.menu-open .site-header {
+        backdrop-filter: blur(4px);
     }
 
     body.menu-open {

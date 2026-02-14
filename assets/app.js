@@ -26,31 +26,41 @@ window.initAddressAutocomplete = initAddressAutocomplete;
 const initMobileMenu = () => {
     const menuBtn = document.getElementById('mobileMenuBtn');
     const mainNav = document.getElementById('mainNav');
+    const pageContent = document.querySelector('.page');
     
     if (!menuBtn || !mainNav) return;
     
-    menuBtn.addEventListener('click', () => {
+    const closeMenu = () => {
+        menuBtn.classList.remove('active');
+        mainNav.classList.remove('active');
+        document.body.classList.remove('menu-open');
+    };
+    
+    const toggleMenu = () => {
         menuBtn.classList.toggle('active');
         mainNav.classList.toggle('active');
         document.body.classList.toggle('menu-open');
-    });
+    };
+    
+    menuBtn.addEventListener('click', toggleMenu);
     
     // Close menu when a link is clicked
     const navLinks = mainNav.querySelectorAll('a');
     navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            menuBtn.classList.remove('active');
-            mainNav.classList.remove('active');
-            document.body.classList.remove('menu-open');
-        });
+        link.addEventListener('click', closeMenu);
     });
     
-    // Close menu when clicking outside
+    // Close menu when clicking on the page content (blurred area)
+    if (pageContent) {
+        pageContent.addEventListener('click', closeMenu);
+    }
+    
+    // Close menu when clicking outside header
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.site-header') && !e.target.closest('.nav')) {
-            menuBtn.classList.remove('active');
-            mainNav.classList.remove('active');
-            document.body.classList.remove('menu-open');
+        if (document.body.classList.contains('menu-open') && 
+            !e.target.closest('.site-header') && 
+            !e.target.closest('.nav')) {
+            closeMenu();
         }
     });
 };
