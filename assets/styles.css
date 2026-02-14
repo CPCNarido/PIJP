@@ -821,6 +821,10 @@ textarea:focus {
     }
 }
 
+.nav-close-btn {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .site-header {
         flex-direction: row;
@@ -905,7 +909,7 @@ textarea:focus {
         color: var(--text);
         cursor: pointer;
         padding: 8px;
-        display: none;
+        display: none !important;
         z-index: 1002;
         transition: color 0.2s;
     }
@@ -915,7 +919,7 @@ textarea:focus {
     }
 
     body.menu-open .nav-close-btn {
-        display: flex;
+        display: flex !important;
         align-items: center;
         justify-content: center;
     }
