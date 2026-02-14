@@ -9,13 +9,50 @@ $metrics = [
 ];
 $products = [];
 
+// Get filter and search parameters
+$category = $_GET['category'] ?? 'all';
+$search = trim($_GET['search'] ?? '');
+$sort = $_GET['sort'] ?? 'newest';
+
 try {
     $pdo = db();
     $metrics['tanks'] = (int) $pdo->query('SELECT COUNT(*) FROM gas_tanks WHERE active = 1')->fetchColumn();
     $metrics['orders'] = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status IN ('approved','delivered')")->fetchColumn();
     $metrics['users'] = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
-    $stmt = $pdo->prepare('SELECT id, name, image_path, size_kg, price FROM gas_tanks WHERE active = 1 ORDER BY created_at DESC LIMIT 6');
-    $stmt->execute();
+    
+    // Build query with filters
+    $query = 'SELECT id, name, category, image_path, size_kg, price FROM gas_tanks WHERE active = 1';
+    $params = [];
+    
+    if ($category !== 'all' && in_array($category, ['gas', 'accessories', 'stove'])) {
+        $query .= ' AND category = :category';
+        $params['category'] = $category;
+    }
+    
+    if ($search !== '') {
+        $query .= ' AND name LIKE :search';
+        $params['search'] = '%' . $search . '%';
+    }
+    
+    // Add sorting
+    switch ($sort) {
+        case 'price_low':
+            $query .= ' ORDER BY price ASC';
+            break;
+        case 'price_high':
+            $query .= ' ORDER BY price DESC';
+            break;
+        case 'name':
+            $query .= ' ORDER BY name ASC';
+            break;
+        default:
+            $query .= ' ORDER BY created_at DESC';
+    }
+    
+    $query .= ' LIMIT 12';
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
     $products = $stmt->fetchAll();
 } catch (Throwable $e) {
     // Database not configured yet.
@@ -102,6 +139,30 @@ try {
         <h2 class="section-title">Our products</h2>
         <p class="hero-copy">Reliable cylinders for every kitchen size and cooking demand.</p>
     </div>
+    
+    <div class="search-filter-bar">
+        <form method="get" action="/index.php" class="search-form">
+            <input type="text" name="search" class="search-input" placeholder="Search products..." value="<?php echo e($search); ?>">
+            <button type="submit" class="search-button">Search</button>
+        </form>
+        
+        <div class="filter-group">
+            <a href="?category=all&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'all' ? 'active' : ''; ?>">All</a>
+            <a href="?category=gas&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'gas' ? 'active' : ''; ?>">Gas</a>
+            <a href="?category=accessories&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'accessories' ? 'active' : ''; ?>">Accessories</a>
+            <a href="?category=stove&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'stove' ? 'active' : ''; ?>">Stove</a>
+        </div>
+        
+        <div class="sort-group">
+            <label for="sort" style="font-size: 14px; font-weight: 600; color: var(--muted);">Sort by:</label>
+            <select id="sort" class="sort-select" onchange="window.location.href='?category=<?php echo e($category); ?>&search=<?php echo urlencode($search); ?>&sort=' + this.value">
+                <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Newest</option>
+                <option value="name" <?php echo $sort === 'name' ? 'selected' : ''; ?>>Name</option>
+                <option value="price_low" <?php echo $sort === 'price_low' ? 'selected' : ''; ?>>Price: Low to High</option>
+                <option value="price_high" <?php echo $sort === 'price_high' ? 'selected' : ''; ?>>Price: High to Low</option>
+            </select>
+        </div>
+    </div>
     <div class="grid product-grid">
         <?php if (!$products): ?>
             <div class="card">No products available yet. Please check back soon.</div>
@@ -113,8 +174,9 @@ try {
                             <img src="<?php echo e($product['image_path']); ?>" alt="<?php echo e($product['name']); ?>">
                         <?php endif; ?>
                     </div>
+                    <span class="product-category"><?php echo e(ucfirst($product['category'])); ?></span>
                     <h3><?php echo e($product['name']); ?></h3>
-                    <p class="hero-copy"><?php echo e((string) $product['size_kg']); ?> kg cylinder · PHP <?php echo e((string) number_format((float) $product['price'], 2)); ?></p>
+                    <p class="hero-copy"><?php echo e((string) $product['size_kg']); ?> kg · PHP <?php echo e((string) number_format((float) $product['price'], 2)); ?></p>
                     <span class="badge">Available</span>
                 </div>
             <?php endforeach; ?>
@@ -139,32 +201,5 @@ try {
     </div>
 </section>
 
-<section class="section-block">
-    <div class="section-head">
-        <h2 class="section-title">Get in touch</h2>
-        <p class="hero-copy">Share your details and our representative will reach out.</p>
-    </div>
-    <div class="card contact-card">
-        <form class="form contact-form" action="#" method="post">
-            <div>
-                <label for="contact_name">Name</label>
-                <input class="input" id="contact_name" name="contact_name" placeholder="Full name" type="text">
-            </div>
-            <div>
-                <label for="contact_phone">Mobile number</label>
-                <input class="input" id="contact_phone" name="contact_phone" placeholder="Phone number" type="tel">
-            </div>
-            <div>
-                <label for="contact_email">Email</label>
-                <input class="input" id="contact_email" name="contact_email" placeholder="you@email.com" type="email">
-            </div>
-            <div>
-                <label for="contact_message">Query / Feedback</label>
-                <textarea class="input" id="contact_message" name="contact_message" rows="4" placeholder="Tell us how we can help"></textarea>
-            </div>
-            <button class="button" type="button">Submit</button>
-        </form>
-    </div>
-</section>
 
 <?php require_once __DIR__ . '/partials/footer.php'; ?>

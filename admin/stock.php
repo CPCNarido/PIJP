@@ -31,10 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'add') {
         $name = trim($_POST['name'] ?? '');
+        $category = $_POST['category'] ?? 'gas';
         $size = (float) ($_POST['size_kg'] ?? 0);
         $price = (float) ($_POST['price'] ?? 0);
         $qty = (int) ($_POST['available_qty'] ?? 0);
         $image = $_FILES['image'] ?? null;
+
+        if (!in_array($category, ['gas', 'accessories', 'stove'])) {
+            $category = 'gas';
+        }
 
         if ($name === '' || $size <= 0 || $price <= 0) {
             set_flash('error', 'Provide valid tank details.');
@@ -70,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $imagePath = '/uploads/tanks/' . $filename;
                     }
 
-                    $stmt = $pdo->prepare('INSERT INTO gas_tanks (name, image_path, size_kg, price, available_qty) VALUES (:name, :image, :size, :price, :qty)');
-                    $stmt->execute(['name' => $name, 'image' => $imagePath, 'size' => $size, 'price' => $price, 'qty' => $qty]);
+                    $stmt = $pdo->prepare('INSERT INTO gas_tanks (name, category, image_path, size_kg, price, available_qty) VALUES (:name, :category, :image, :size, :price, :qty)');
+                    $stmt->execute(['name' => $name, 'category' => $category, 'image' => $imagePath, 'size' => $size, 'price' => $price, 'qty' => $qty]);
                     set_flash('success', 'Tank added.');
                     redirect('/admin/stock.php');
                 } catch (Exception $e) {
@@ -102,16 +107,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$tanks = $pdo->query('SELECT id, name, image_path, size_kg, price, available_qty, active FROM gas_tanks ORDER BY name')->fetchAll();
+$tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, available_qty, active FROM gas_tanks ORDER BY name')->fetchAll();
 ?>
 
-<h2 class="section-title">Manage Gas Tank Stock</h2>
+<h2 class="section-title">Manage Product Stock</h2>
 
 <div class="card">
     <form class="form" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="add">
-        <label for="name">Tank name</label>
+        <label for="name">Product name</label>
         <input class="input" id="name" name="name" required>
+
+        <label for="category">Category</label>
+        <select class="select" id="category" name="category" required>
+            <option value="gas">Gas</option>
+            <option value="accessories">Accessories</option>
+            <option value="stove">Stove</option>
+        </select>
 
         <label for="size_kg">Size (kg)</label>
         <input class="input" type="number" step="0.1" id="size_kg" name="size_kg" required>
@@ -133,6 +145,7 @@ $tanks = $pdo->query('SELECT id, name, image_path, size_kg, price, available_qty
     <thead>
         <tr>
             <th>Name</th>
+            <th>Category</th>
             <th>Image</th>
             <th>Size (kg)</th>
             <th>Price</th>
@@ -145,6 +158,7 @@ $tanks = $pdo->query('SELECT id, name, image_path, size_kg, price, available_qty
         <?php foreach ($tanks as $tank): ?>
             <tr>
                 <td><?php echo e($tank['name']); ?></td>
+                <td><span class="badge"><?php echo e(ucfirst($tank['category'])); ?></span></td>
                 <td>
                     <?php if (!empty($tank['image_path'])): ?>
                         <img class="tank-thumb" src="<?php echo e($tank['image_path']); ?>" alt="<?php echo e($tank['name']); ?>">

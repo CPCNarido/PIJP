@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_tanks WHERE active = 1 ORDER BY name')->fetchAll();
+$tanks = $pdo->query('SELECT id, name, category, size_kg, price, available_qty FROM gas_tanks WHERE active = 1 ORDER BY category, name')->fetchAll();
 ?>
 
 <h2 class="section-title">Log Offline Order</h2>
@@ -89,12 +89,12 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
         <label for="delivery_address">Delivery address</label>
         <input class="input" id="delivery_address" name="delivery_address" required maxlength="500" placeholder="Customer's delivery address">
 
-        <label for="gas_tank_id">Tank</label>
+        <label for="gas_tank_id">Product</label>
         <select class="select" id="gas_tank_id" name="gas_tank_id" required>
-            <option value="">Choose a tank</option>
+            <option value="">Choose a product</option>
             <?php foreach ($tanks as $tank): ?>
                 <option value="<?php echo e((string) $tank['id']); ?>">
-                    <?php echo e($tank['name']); ?> - <?php echo e((string) $tank['size_kg']); ?> kg
+                    [<?php echo e(ucfirst($tank['category'])); ?>] <?php echo e($tank['name']); ?> - <?php echo e((string) $tank['size_kg']); ?> kg
                 </option>
             <?php endforeach; ?>
         </select>
