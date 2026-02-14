@@ -1,4 +1,4 @@
-  <?php
+<?php
 require_once __DIR__ . '/../partials/header.php';
 require_admin();
 require_once __DIR__ . '/../db.php';

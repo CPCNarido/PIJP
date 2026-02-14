@@ -41,10 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 const startPolling = () => {
     const realtimePaths = [
         '/admin/index.php',
-        '/admin/orders.php',
-        '/admin/stock.php',
-        '/admin/staff.php',
-        '/admin/offline_order.php',
         '/admin/sales.php',
         '/user/orders.php',
         '/user/index.php',
