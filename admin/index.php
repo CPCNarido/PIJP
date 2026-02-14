@@ -45,9 +45,17 @@ $metrics = [
                 <h3>Approve Orders</h3>
                 <p class="hero-copy">Review pending orders and update status.</p>
             </a>
+            <a class="card" href="/admin/staff.php">
+                <h3>Delivery Staff</h3>
+                <p class="hero-copy">Manage and assign delivery riders.</p>
+            </a>
             <a class="card" href="/admin/offline_order.php">
                 <h3>Offline Order</h3>
                 <p class="hero-copy">Log walk-in or phone orders.</p>
+            </a>
+            <a class="card" href="/admin/users.php">
+                <h3>Users</h3>
+                <p class="hero-copy">View registered customers.</p>
             </a>
             <a class="card" href="/admin/sales.php">
                 <h3>Sales Report</h3>

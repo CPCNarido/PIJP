@@ -6,12 +6,14 @@ End-to-end gas ordering website with customer ordering and admin management.
 
 User
 - View available gas tanks and stock
-- Place orders online
+- Place orders online with delivery address
 - Track order status and updates
+- See assigned delivery rider details after approval
 
 Admin
 - Add, update, or retire gas tanks
-- Approve and update orders
+- Manage delivery staff (add riders with name & phone)
+- Approve orders and assign delivery staff
 - View registered users
 - Review overall sales
 - Log offline orders (walk-in or phone)
@@ -47,7 +49,13 @@ You can generate a password hash with PHP:
 - Backend: Render (use Docker with the provided `Dockerfile`)
 - Frontend: GitHub Pages can host a static marketing page, but the PHP app should be served from Render.
 
-If you want a separate static landing page for GitHub Pages, we can add one.
+### Google Maps Integration
+To enable address autocomplete in the order form:
+1. Get a Google Maps API key from [Google Cloud Console](https://cloud.google.com/console).
+2. Replace `AIzaSyDummy` in [user/index.php](user/index.php) with your actual API key.
+3. Redeploy to Render.
+
+Without the API key, users can still type addresses manually.
 
 ### Render Quick Fix (PHP not found)
 If your service is deploying with Node and shows `php: command not found`, switch the service to Docker:

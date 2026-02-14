@@ -8,9 +8,12 @@ $pdo = db();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tank_id = (int) ($_POST['gas_tank_id'] ?? 0);
     $qty = (int) ($_POST['qty'] ?? 0);
+    $delivery_address = trim($_POST['delivery_address'] ?? '');
 
     if ($tank_id <= 0 || $qty <= 0) {
         set_flash('error', 'Please select a tank and quantity.');
+    } else if ($delivery_address === '') {
+        set_flash('error', 'Please provide a delivery address.');
     } else {
         $pdo->beginTransaction();
         try {
@@ -22,9 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Insufficient stock for this tank.');
             }
 
-            $stmt = $pdo->prepare('INSERT INTO orders (user_id, status, source) VALUES (:user_id, :status, :source)');
+            $stmt = $pdo->prepare('INSERT INTO orders (user_id, delivery_address, status, source) VALUES (:user_id, :address, :status, :source)');
             $stmt->execute([
                 'user_id' => $_SESSION['user_id'],
+                'address' => $delivery_address,
                 'status' => 'pending',
                 'source' => 'web',
             ]);
@@ -77,22 +81,52 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
     <div class="hero-card">
         <h2 class="section-title">Place an order</h2>
         <form class="form" method="post">
-            <label for="gas_tank_id">Select tank</label>
-            <select class="select" id="gas_tank_id" name="gas_tank_id" required>
-                <option value="">Choose a tank</option>
-                <?php foreach ($tanks as $tank): ?>
-                    <option value="<?php echo e((string) $tank['id']); ?>">
-                        <?php echo e($tank['name']); ?> - <?php echo e((string) $tank['size_kg']); ?> kg
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <div>
+                <label for="gas_tank_id">Select tank</label>
+                <select class="select" id="gas_tank_id" name="gas_tank_id" required>
+                    <option value="">Choose a tank</option>
+                    <?php foreach ($tanks as $tank): ?>
+                        <option value="<?php echo e((string) $tank['id']); ?>">
+                            <?php echo e($tank['name']); ?> - <?php echo e((string) $tank['size_kg']); ?> kg (PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-            <label for="qty">Quantity</label>
-            <input class="input" type="number" id="qty" name="qty" min="1" required>
+            <div>
+                <label for="qty">Quantity</label>
+                <input class="input" type="number" id="qty" name="qty" min="1" required placeholder="How many cylinders?">
+            </div>
 
-            <button class="button" type="submit">Submit order</button>
+            <div>
+                <label for="delivery_address">Delivery Address</label>
+                <input class="input" type="text" id="delivery_address" name="delivery_address" required placeholder="Enter your delivery address">
+                <small style="color: var(--muted-light); margin-top: 6px; display: block;">Start typing your address for suggestions</small>
+            </div>
+
+            <button class="button" type="submit" style="width: 100%;">Submit Order</button>
         </form>
     </div>
 </section>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummy&libraries=places"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('delivery_address');
+    // Note: Replace 'AIzaSyDummy' with your actual Google Maps API key
+    // For now, this provides a text input. To enable full autocomplete, get an API key from Google Cloud Console
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['geocode']
+        });
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.formatted_address) {
+                input.value = place.formatted_address;
+            }
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

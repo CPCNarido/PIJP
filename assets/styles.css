@@ -292,6 +292,11 @@ a:hover {
     gap: 6px;
 }
 
+.form > div {
+    display: grid;
+    gap: 6px;
+}
+
 .form label {
     font-weight: 600;
     font-size: 14px;
@@ -415,6 +420,11 @@ textarea:focus {
 .status.approved {
     background: #dcfce7;
     color: #166534;
+}
+
+.status.in_delivery {
+    background: #e0e7ff;
+    color: #3730a3;
 }
 
 .status.delivered {

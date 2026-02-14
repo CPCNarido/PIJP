@@ -8,11 +8,12 @@ $pdo = db();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['customer_name'] ?? '');
     $email = trim($_POST['customer_email'] ?? '');
+    $address = trim($_POST['delivery_address'] ?? '');
     $tank_id = (int) ($_POST['gas_tank_id'] ?? 0);
     $qty = (int) ($_POST['qty'] ?? 0);
 
-    if ($name === '' || $tank_id <= 0 || $qty <= 0) {
-        set_flash('error', 'Provide valid offline order details.');
+    if ($name === '' || $tank_id <= 0 || $qty <= 0 || $address === '') {
+        set_flash('error', 'Provide valid offline order details including address.');
     } else {
         $pdo->beginTransaction();
         try {
@@ -24,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Insufficient stock for this tank.');
             }
 
-            $stmt = $pdo->prepare('INSERT INTO orders (customer_name, customer_email, status, source) VALUES (:name, :email, :status, :source)');
+            $stmt = $pdo->prepare('INSERT INTO orders (customer_name, customer_email, delivery_address, status, source) VALUES (:name, :email, :address, :status, :source)');
             $stmt->execute([
                 'name' => $name,
                 'email' => $email ?: null,
+                'address' => $address,
                 'status' => 'approved',
                 'source' => 'offline',
             ]);
@@ -73,6 +75,9 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
 
         <label for="customer_email">Customer email (optional)</label>
         <input class="input" type="email" id="customer_email" name="customer_email">
+
+        <label for="delivery_address">Delivery address</label>
+        <input class="input" id="delivery_address" name="delivery_address" required placeholder="Customer's delivery address">
 
         <label for="gas_tank_id">Tank</label>
         <select class="select" id="gas_tank_id" name="gas_tank_id" required>
