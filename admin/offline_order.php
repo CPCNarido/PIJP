@@ -12,8 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tank_id = (int) ($_POST['gas_tank_id'] ?? 0);
     $qty = (int) ($_POST['qty'] ?? 0);
 
+    if ($address !== '') {
+        $address = preg_replace('/\s+/', ' ', $address);
+    }
+
     if ($name === '' || $tank_id <= 0 || $qty <= 0 || $address === '') {
         set_flash('error', 'Provide valid offline order details including address.');
+    } else if (mb_strlen($name) > 120) {
+        set_flash('error', 'Customer name is too long.');
+    } else if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        set_flash('error', 'Provide a valid email address.');
+    } else if (mb_strlen($address) > 500) {
+        set_flash('error', 'Delivery address is too long.');
     } else {
         $pdo->beginTransaction();
         try {
@@ -71,13 +81,13 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
 <div class="card">
     <form class="form" method="post">
         <label for="customer_name">Customer name</label>
-        <input class="input" id="customer_name" name="customer_name" required>
+        <input class="input" id="customer_name" name="customer_name" required maxlength="120">
 
         <label for="customer_email">Customer email (optional)</label>
-        <input class="input" type="email" id="customer_email" name="customer_email">
+        <input class="input" type="email" id="customer_email" name="customer_email" maxlength="160">
 
         <label for="delivery_address">Delivery address</label>
-        <input class="input" id="delivery_address" name="delivery_address" required placeholder="Customer's delivery address">
+        <input class="input" id="delivery_address" name="delivery_address" required maxlength="500" placeholder="Customer's delivery address">
 
         <label for="gas_tank_id">Tank</label>
         <select class="select" id="gas_tank_id" name="gas_tank_id" required>

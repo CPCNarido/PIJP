@@ -10,8 +10,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = $_POST['status'] ?? '';
     $staff_id = (int) ($_POST['staff_id'] ?? 0);
     $note = trim($_POST['note'] ?? '');
+    $note = $note !== '' ? preg_replace('/\s+/', ' ', $note) : '';
 
-    if ($order_id > 0 && in_array($status, ['approved', 'in_delivery', 'delivered', 'cancelled'], true)) {
+    if ($order_id <= 0 || !in_array($status, ['approved', 'in_delivery', 'delivered', 'cancelled'], true)) {
+        set_flash('error', 'Select a valid order update.');
+    } else if (mb_strlen($note) > 255) {
+        set_flash('error', 'Note is too long.');
+    } else if (in_array($status, ['in_delivery', 'delivered'], true) && $staff_id <= 0) {
+        set_flash('error', 'Assign a delivery staff member before marking in delivery or delivered.');
+    } else {
+        if ($staff_id > 0) {
+            $staffStmt = $pdo->prepare('SELECT id FROM staff WHERE id = :id AND active = 1');
+            $staffStmt->execute(['id' => $staff_id]);
+            if (!$staffStmt->fetch()) {
+                set_flash('error', 'Selected staff member is not available.');
+                redirect('/admin/orders.php');
+            }
+        }
+
         $stmt = $pdo->prepare('UPDATE orders SET status = :status, staff_id = :staff_id WHERE id = :id');
         $stmt->execute(['status' => $status, 'staff_id' => $staff_id > 0 ? $staff_id : null, 'id' => $order_id]);
 
@@ -28,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $orders = $pdo->query(
-    "SELECT o.id, o.status, o.delivery_address, o.created_at, o.source, u.name AS user_name, o.customer_name,
+    "SELECT o.id, o.status, o.delivery_address, o.created_at, o.source, o.staff_id, u.name AS user_name, o.customer_name,
             i.qty, i.unit_price, g.name AS tank_name, s.name AS staff_name, s.phone
      FROM orders o
      JOIN order_items i ON i.order_id = o.id
@@ -88,7 +104,7 @@ $staff = $pdo->query('SELECT id, name, phone FROM staff WHERE active = 1 ORDER B
                         <select class="select" name="staff_id" style="font-size: 12px;">
                             <option value="">Assign staff</option>
                             <?php foreach ($staff as $s): ?>
-                                <option value="<?php echo e((string) $s['id']); ?>" <?php echo $s['id'] == ($order['id'] ?? '') ? 'selected' : ''; ?>>
+                                <option value="<?php echo e((string) $s['id']); ?>" <?php echo $s['id'] == ($order['staff_id'] ?? '') ? 'selected' : ''; ?>>
                                     <?php echo e($s['name']); ?> (<?php echo e($s['phone']); ?>)
                                 </option>
                             <?php endforeach; ?>

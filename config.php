@@ -27,5 +27,6 @@ if ($dbUrl !== '') {
 return [
     'app_name' => getenv('APP_NAME') ?: 'PIJP Gas Ordering',
     'base_url' => getenv('APP_BASE_URL') ?: '/',
+    'google_maps_key' => getenv('GOOGLE_MAPS_KEY') ?: '',
     'db' => $dbConfig,
 ];

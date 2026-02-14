@@ -18,14 +18,18 @@ try {
 }
 ?>
 
-<section class="hero">
-    <div class="hero-card">
-        <span class="badge">Live inventory & approval flow</span>
-        <h1 class="hero-title">Order LPG cylinders with full visibility.</h1>
+<section class="hero hero--landing">
+    <div class="hero-card hero-primary">
+        <span class="eyebrow">Fast, verified LPG delivery</span>
+        <h1 class="hero-title">Modern LPG ordering with trusted delivery teams.</h1>
         <p class="hero-copy">
-            PIJP connects customers and admins in a single system: stock tracking, order approval,
-            and delivery progress in real time.
+            PIJP brings real-time stock, guided approvals, and rider assignment into one platform so
+            every order is tracked from request to doorstep.
         </p>
+        <div class="cta-group">
+            <a class="button" href="/register.php">Create account</a>
+            <a class="button secondary" href="/login.php">Sign in</a>
+        </div>
         <div class="metrics">
             <div class="metric">
                 <h4>Active Tanks</h4>
@@ -41,21 +45,38 @@ try {
             </div>
         </div>
     </div>
-    <div class="hero-card">
-        <h2 class="section-title">What you can do</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>Customers</h3>
-                <p class="hero-copy">Browse available tanks, place orders, and monitor delivery progress.</p>
-            </div>
-            <div class="card">
-                <h3>Admins</h3>
-                <p class="hero-copy">Manage stock, approve orders, log offline sales, and review analytics.</p>
-            </div>
-            <div class="card">
-                <h3>Operations</h3>
-                <p class="hero-copy">Every order is tracked with status updates for complete transparency.</p>
-            </div>
+    <div class="hero-visual">
+        <div class="hero-orb"></div>
+        <div class="hero-panel">
+            <h3>Service highlights</h3>
+            <ul class="feature-list">
+                <li>Fast approval workflows for admins</li>
+                <li>Live delivery status for customers</li>
+                <li>Verified rider assignment and contact</li>
+            </ul>
+        </div>
+        <div class="hero-panel">
+            <h3>Operations view</h3>
+            <p class="hero-copy">Track sales, stock movement, and delivery timelines in one dashboard.</p>
+            <span class="badge">Unified control center</span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title">What you can do</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Customers</h3>
+            <p class="hero-copy">Browse available tanks, place orders, and monitor delivery progress.</p>
+        </div>
+        <div class="card">
+            <h3>Admins</h3>
+            <p class="hero-copy">Manage stock, approve orders, log offline sales, and review analytics.</p>
+        </div>
+        <div class="card">
+            <h3>Operations</h3>
+            <p class="hero-copy">Every order is tracked with status updates for complete transparency.</p>
         </div>
     </div>
 </section>

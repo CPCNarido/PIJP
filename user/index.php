@@ -3,6 +3,9 @@ require_once __DIR__ . '/../partials/header.php';
 require_login();
 require_once __DIR__ . '/../db.php';
 
+$config = require __DIR__ . '/../config.php';
+$mapsKey = trim($config['google_maps_key'] ?? '');
+
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,10 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $qty = (int) ($_POST['qty'] ?? 0);
     $delivery_address = trim($_POST['delivery_address'] ?? '');
 
+    if ($delivery_address !== '') {
+        $delivery_address = preg_replace('/\s+/', ' ', $delivery_address);
+    }
+
     if ($tank_id <= 0 || $qty <= 0) {
         set_flash('error', 'Please select a tank and quantity.');
     } else if ($delivery_address === '') {
         set_flash('error', 'Please provide a delivery address.');
+    } else if (mb_strlen($delivery_address) > 500) {
+        set_flash('error', 'Delivery address is too long.');
     } else {
         $pdo->beginTransaction();
         try {
@@ -100,8 +109,11 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
 
             <div>
                 <label for="delivery_address">Delivery Address</label>
-                <input class="input" type="text" id="delivery_address" name="delivery_address" required placeholder="Enter your delivery address">
+                <input class="input" type="text" id="delivery_address" name="delivery_address" required maxlength="500" placeholder="Enter your delivery address">
                 <small style="color: var(--muted-light); margin-top: 6px; display: block;">Start typing your address for suggestions</small>
+                <?php if ($mapsKey === ''): ?>
+                    <small style="color: var(--muted-light); margin-top: 6px; display: block;">Maps autocomplete is disabled. Add GOOGLE_MAPS_KEY to enable it.</small>
+                <?php endif; ?>
             </div>
 
             <button class="button" type="submit" style="width: 100%;">Submit Order</button>
@@ -109,24 +121,8 @@ $tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_ta
     </div>
 </section>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDummy&libraries=places"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.getElementById('delivery_address');
-    // Note: Replace 'AIzaSyDummy' with your actual Google Maps API key
-    // For now, this provides a text input. To enable full autocomplete, get an API key from Google Cloud Console
-    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-        const autocomplete = new google.maps.places.Autocomplete(input, {
-            types: ['geocode']
-        });
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            if (place.formatted_address) {
-                input.value = place.formatted_address;
-            }
-        });
-    }
-});
-</script>
+<?php if ($mapsKey !== ''): ?>
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=<?php echo e($mapsKey); ?>&libraries=places&callback=initAddressAutocomplete"></script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
