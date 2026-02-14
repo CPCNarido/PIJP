@@ -115,16 +115,20 @@ $tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, ava
              data-date="<?php echo e($tank['created_ts']); ?>"
              data-stock="<?php echo e($tank['available_qty']); ?>">
             <?php if (!empty($tank['image_path'])): ?>
-                <img class="tank-image" src="<?php echo e($tank['image_path']); ?>" alt="<?php echo e($tank['name']); ?>">
+                <div class="product-image">
+                    <img src="<?php echo e($tank['image_path']); ?>" alt="<?php echo e($tank['name']); ?>">
+                </div>
             <?php endif; ?>
             <span class="product-category"><?php echo e(ucfirst($tank['category'])); ?></span>
             <h3><?php echo e($tank['name']); ?></h3>
             <p class="hero-copy">Size: <?php echo e((string) $tank['size_kg']); ?> kg</p>
-            <p class="hero-copy">Price: PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?></p>
+            <p class="hero-copy" style="font-weight: 700; color: var(--primary);">PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?></p>
             <?php if ($tank['available_qty'] <= 0): ?>
                 <p class="badge" style="background: var(--danger); color: white;">Out of Stock</p>
+                <button class="button-secondary" disabled style="width: 100%; opacity: 0.5; cursor: not-allowed;">Out of Stock</button>
             <?php else: ?>
                 <p class="badge">Stock: <?php echo e((string) $tank['available_qty']); ?></p>
+                <button class="button" onclick="addToCart(<?php echo e((string) $tank['id']); ?>)" style="width: 100%;">Add to Cart</button>
             <?php endif; ?>
         </div>
     <?php endforeach; ?>
@@ -164,6 +168,51 @@ $tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, ava
         </form>
     </div>
 </section>
+
+<script>
+async function addToCart(tankId) {
+    const formData = new FormData();
+    formData.append('tank_id', tankId);
+    formData.append('qty', 1);
+
+    try {
+        const response = await fetch('/api/cart.php?action=add', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✓ Added to cart!');
+            updateCartCount();
+        } else {
+            alert(data.message || 'Error adding to cart');
+        }
+    } catch (error) {
+        alert('Error adding to cart');
+    }
+}
+
+async function updateCartCount() {
+    try {
+        const response = await fetch('/api/cart.php?action=count');
+        const data = await response.json();
+        
+        if (data.success) {
+            const badge = document.querySelector('.cart-badge');
+            if (badge) {
+                badge.textContent = data.count;
+                badge.style.display = data.count > 0 ? 'flex' : 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error updating cart count');
+    }
+}
+
+// Update cart count on page load
+document.addEventListener('DOMContentLoaded', updateCartCount);
+</script>
 
 <?php if ($mapsKey !== ''): ?>
     <script defer src="https://maps.googleapis.com/maps/api/js?key=<?php echo e($mapsKey); ?>&libraries=places&callback=initAddressAutocomplete"></script>

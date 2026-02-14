@@ -149,6 +149,15 @@ try {
                     <?php else: ?>
                         <span class="badge">Available</span>
                     <?php endif; ?>
+                    <?php if ($user && $user['role'] === 'user'): ?>
+                        <?php if ($product['available_qty'] > 0): ?>
+                            <button class="button" onclick="addToCart(<?php echo e((string) $product['id']); ?>)" style="width: 100%; margin-top: 8px;">Add to Cart</button>
+                        <?php else: ?>
+                            <button class="button-secondary" disabled style="width: 100%; margin-top: 8px; opacity: 0.5; cursor: not-allowed;">Out of Stock</button>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <a href="/login.php" class="button" style="width: 100%; margin-top: 8px; display: inline-block; text-align: center;">Login to Order</a>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -172,5 +181,34 @@ try {
     </div>
 </section>
 
+
+<?php if ($user && $user['role'] === 'user'): ?>
+<script>
+async function addToCart(tankId) {
+    const formData = new FormData();
+    formData.append('tank_id', tankId);
+    formData.append('qty', 1);
+
+    try {
+        const response = await fetch('/api/cart.php?action=add', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✓ Added to cart!');
+            if (window.updateCartCount) {
+                window.updateCartCount();
+            }
+        } else {
+            alert(data.message || 'Error adding to cart');
+        }
+    } catch (error) {
+        alert('Error adding to cart');
+    }
+}
+</script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/partials/footer.php'; ?>

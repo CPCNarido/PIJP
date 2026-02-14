@@ -168,3 +168,31 @@ const initProductFilters = () => {
 };
 
 document.addEventListener('DOMContentLoaded', initProductFilters);
+
+// Global cart count updater
+async function updateCartCount() {
+    const cartBadge = document.querySelector('.cart-badge');
+    if (!cartBadge) return;
+
+    try {
+        const response = await fetch('/api/cart.php?action=count');
+        const data = await response.json();
+        
+        if (data.success) {
+            cartBadge.textContent = data.count;
+            cartBadge.style.display = data.count > 0 ? 'flex' : 'none';
+        }
+    } catch (error) {
+        console.error('Error updating cart count');
+    }
+}
+
+// Update cart count on page load for logged-in users
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.querySelector('.cart-link')) {
+        updateCartCount();
+    }
+});
+
+// Make updateCartCount available globally
+window.updateCartCount = updateCartCount;

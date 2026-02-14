@@ -33,6 +33,10 @@ $config = require __DIR__ . '/../config.php';
                 <?php else: ?>
                     <a href="/user/index.php">Dashboard</a>
                     <a href="/user/orders.php">My Orders</a>
+                    <a href="/user/cart.php" class="cart-link">
+                        🛒 Cart
+                        <span class="cart-badge" style="display: none;">0</span>
+                    </a>
                 <?php endif; ?>
                 <a href="/logout.php">Logout</a>
             <?php endif; ?>
