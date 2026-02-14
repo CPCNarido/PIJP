@@ -37,3 +37,27 @@ document.addEventListener('DOMContentLoaded', () => {
         initAddressAutocomplete();
     }
 });
+
+const startPolling = () => {
+    const realtimePaths = [
+        '/admin/index.php',
+        '/admin/orders.php',
+        '/admin/stock.php',
+        '/admin/staff.php',
+        '/admin/offline_order.php',
+        '/admin/sales.php',
+        '/user/orders.php',
+        '/user/index.php',
+        '/',
+    ];
+
+    if (!realtimePaths.includes(window.location.pathname)) {
+        return;
+    }
+
+    setInterval(() => {
+        window.location.reload();
+    }, 5000);
+};
+
+document.addEventListener('DOMContentLoaded', startPolling);
