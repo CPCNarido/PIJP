@@ -19,6 +19,7 @@ CREATE TABLE staff (
 CREATE TABLE gas_tanks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
+    image_path VARCHAR(255) NULL,
     size_kg DECIMAL(6,2) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     available_qty INT NOT NULL DEFAULT 0,

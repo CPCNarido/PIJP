@@ -71,13 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$tanks = $pdo->query('SELECT id, name, size_kg, price, available_qty FROM gas_tanks WHERE active = 1 ORDER BY name')->fetchAll();
+$tanks = $pdo->query('SELECT id, name, image_path, size_kg, price, available_qty FROM gas_tanks WHERE active = 1 ORDER BY name')->fetchAll();
 ?>
 
 <h2 class="section-title">Available Gas Tanks</h2>
 <div class="grid">
     <?php foreach ($tanks as $tank): ?>
         <div class="card">
+            <?php if (!empty($tank['image_path'])): ?>
+                <img class="tank-image" src="<?php echo e($tank['image_path']); ?>" alt="<?php echo e($tank['name']); ?>">
+            <?php endif; ?>
             <h3><?php echo e($tank['name']); ?></h3>
             <p class="hero-copy">Size: <?php echo e((string) $tank['size_kg']); ?> kg</p>
             <p class="hero-copy">Price: PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?></p>
