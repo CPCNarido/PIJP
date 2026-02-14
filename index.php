@@ -7,12 +7,16 @@ $metrics = [
     'orders' => 0,
     'users' => 0,
 ];
+$products = [];
 
 try {
     $pdo = db();
     $metrics['tanks'] = (int) $pdo->query('SELECT COUNT(*) FROM gas_tanks WHERE active = 1')->fetchColumn();
     $metrics['orders'] = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status IN ('approved','delivered')")->fetchColumn();
     $metrics['users'] = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+    $stmt = $pdo->prepare('SELECT id, name, image_path, size_kg, price FROM gas_tanks WHERE active = 1 ORDER BY created_at DESC LIMIT 6');
+    $stmt->execute();
+    $products = $stmt->fetchAll();
 } catch (Throwable $e) {
     // Database not configured yet.
 }
@@ -99,24 +103,22 @@ try {
         <p class="hero-copy">Reliable cylinders for every kitchen size and cooking demand.</p>
     </div>
     <div class="grid product-grid">
-        <div class="product-card">
-            <div class="product-image"></div>
-            <h3>12kg LPG Cylinder</h3>
-            <p class="hero-copy">For families and daily cooking routines.</p>
-            <span class="badge">Best seller</span>
-        </div>
-        <div class="product-card">
-            <div class="product-image is-compact"></div>
-            <h3>4kg LPG Cylinder</h3>
-            <p class="hero-copy">Compact and ideal for small homes.</p>
-            <span class="badge">Compact</span>
-        </div>
-        <div class="product-card">
-            <div class="product-image is-accessory"></div>
-            <h3>Safety Kit</h3>
-            <p class="hero-copy">Leak detector + regulator bundle.</p>
-            <span class="badge">Safety first</span>
-        </div>
+        <?php if (!$products): ?>
+            <div class="card">No products available yet. Please check back soon.</div>
+        <?php else: ?>
+            <?php foreach ($products as $product): ?>
+                <div class="product-card">
+                    <div class="product-image">
+                        <?php if (!empty($product['image_path'])): ?>
+                            <img src="<?php echo e($product['image_path']); ?>" alt="<?php echo e($product['name']); ?>">
+                        <?php endif; ?>
+                    </div>
+                    <h3><?php echo e($product['name']); ?></h3>
+                    <p class="hero-copy"><?php echo e((string) $product['size_kg']); ?> kg cylinder · PHP <?php echo e((string) number_format((float) $product['price'], 2)); ?></p>
+                    <span class="badge">Available</span>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </section>
 

@@ -336,6 +336,16 @@ a:hover {
     border-radius: 16px;
     background: linear-gradient(135deg, #fde68a 0%, #fb923c 50%, #f97316 100%);
     border: 1px solid rgba(236, 217, 199, 0.8);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .product-image.is-compact {
