@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $config = require __DIR__ . '/config.php';
 
-defunction db(): PDO
+function db(): PDO
 {
     static $pdo = null;
 
