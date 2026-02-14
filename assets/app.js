@@ -25,6 +25,7 @@ window.initAddressAutocomplete = initAddressAutocomplete;
 // Mobile menu toggle
 const initMobileMenu = () => {
     const menuBtn = document.getElementById('mobileMenuBtn');
+    const closeBtn = document.getElementById('navCloseBtn');
     const mainNav = document.getElementById('mainNav');
     const pageContent = document.querySelector('.page');
     
@@ -43,6 +44,11 @@ const initMobileMenu = () => {
     };
     
     menuBtn.addEventListener('click', toggleMenu);
+    
+    // Close menu with X button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeMenu);
+    }
     
     // Close menu when a link is clicked
     const navLinks = mainNav.querySelectorAll('a');

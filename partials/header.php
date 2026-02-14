@@ -24,6 +24,7 @@ $config = require __DIR__ . '/../config.php';
         </div>
         <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
         <nav class="nav" id="mainNav">
+            <button class="nav-close-btn" id="navCloseBtn">✕</button>
             <a href="/">Home</a>
             <?php if (!$user): ?>
                 <a href="/register.php">Register</a>
