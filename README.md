@@ -43,8 +43,15 @@ You can generate a password hash with PHP:
 ```
 
 ## Hosting Notes
-- Database: Aiven MySQL (use the Aiven connection string values in `DB_*`)
-- Backend: Render (deploy the PHP app; set environment variables in Render)
+- Database: Aiven MySQL (use the Aiven connection string values in `DB_URL`)
+- Backend: Render (use Docker with the provided `Dockerfile`)
 - Frontend: GitHub Pages can host a static marketing page, but the PHP app should be served from Render.
 
 If you want a separate static landing page for GitHub Pages, we can add one.
+
+### Render Quick Fix (PHP not found)
+If your service is deploying with Node and shows `php: command not found`, switch the service to Docker:
+1. Add the `Dockerfile` from this repo.
+2. In Render, change Runtime to **Docker** (or create a new Docker web service).
+3. Leave Build Command empty.
+4. Start Command is not required (Docker CMD handles it).

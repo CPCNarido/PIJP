@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: pijp-gas-ordering
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: APP_BASE_URL
+        value: https://pijp-gas-ordering.onrender.com
+      - key: DB_URL
+        sync: false
