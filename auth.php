@@ -9,6 +9,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (ob_get_level() === 0) {
+    ob_start();
+}
+
 function current_user(): ?array
 {
     if (!isset($_SESSION['user_id'])) {

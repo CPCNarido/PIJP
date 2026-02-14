@@ -16,9 +16,9 @@ $config = require __DIR__ . '/../config.php';
 <body>
     <header class="site-header">
         <div class="brand">
-            <span class="brand-mark">PIJP</span>
-            <div class="brand-text">
-                <div class="brand-title">PIJP Gas Ordering</div>
+            <div class="brand-mark">PIJP</div>
+            <div>
+                <div class="brand-title"><?php echo e($config['app_name']); ?></div>
                 <div class="brand-subtitle">Track cylinders. Control supply.</div>
             </div>
         </div>
@@ -41,7 +41,8 @@ $config = require __DIR__ . '/../config.php';
 
     <?php if ($flash): ?>
         <div class="flash <?php echo e($flash['type']); ?>">
-            <?php echo e($flash['message']); ?>
+            <span>✓</span>
+            <span><?php echo e($flash['message']); ?></span>
         </div>
     <?php endif; ?>
 

@@ -27,22 +27,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<section class="hero">
-    <div class="hero-card">
-        <h2 class="section-title">Create your account</h2>
-        <form class="form" method="post">
-            <label for="name">Full name</label>
-            <input class="input" id="name" name="name" required>
+<div class="hero">
+    <div style="max-width: 400px; margin: 0 auto; width: 100%;">
+        <div class="hero-card">
+            <h1 class="hero-title" style="font-size: 32px; text-align: center;">Create Account</h1>
+            <p class="hero-copy" style="text-align: center; margin-bottom: 32px;">Join PIJP to order gas</p>
 
-            <label for="email">Email address</label>
-            <input class="input" type="email" id="email" name="email" required>
+            <form class="form" method="post">
+                <div>
+                    <label for="name">Full name</label>
+                    <input class="input" id="name" name="name" required placeholder="Your name">
+                </div>
 
-            <label for="password">Password</label>
-            <input class="input" type="password" id="password" name="password" required>
+                <div>
+                    <label for="email">Email address</label>
+                    <input class="input" type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
 
-            <button class="button" type="submit">Register</button>
-        </form>
+                <div>
+                    <label for="password">Password</label>
+                    <input class="input" type="password" id="password" name="password" required placeholder="At least 8 characters">
+                </div>
+
+                <button class="button" type="submit" style="width: 100%;">Create Account</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <p class="hero-copy">Already have an account? <a href="/login.php" style="font-weight: 600;">Log in here</a></p>
+            </div>
+        </div>
     </div>
-</section>
+</div>
 
 <?php require_once __DIR__ . '/partials/footer.php'; ?>
