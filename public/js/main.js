@@ -172,6 +172,7 @@ async function handleOrderSubmit(e) {
             document.getElementById('order-form').reset();
             cart = {};
             loadProducts(); // Reload to get updated stock
+            initializeOrderItems(); // Reset display
         } else {
             const error = await response.json();
             showNotification(error.error || 'Failed to place order', 'error');

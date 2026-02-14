@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 
@@ -8,8 +7,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // In-memory database (for simplicity)
@@ -128,9 +127,12 @@ app.post('/api/orders', (req, res) => {
     // Update stock levels
     for (const orderItem of items) {
         const item = database.items.find(i => i.id === orderItem.itemId);
-        if (item) {
-            item.stock -= orderItem.quantity;
+        if (!item) {
+            return res.status(400).json({ 
+                error: `Item not found: ${orderItem.name}` 
+            });
         }
+        item.stock -= orderItem.quantity;
     }
     
     // Create transaction record
