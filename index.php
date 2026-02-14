@@ -18,17 +18,17 @@ try {
 }
 ?>
 
-<section class="hero hero--landing">
+<section class="hero hero--landing supergas-hero">
     <div class="hero-card hero-primary">
-        <span class="eyebrow">Fast, verified LPG delivery</span>
-        <h1 class="hero-title">Modern LPG ordering with trusted delivery teams.</h1>
+        <span class="eyebrow">Reliable LPG for home kitchens</span>
+        <h1 class="hero-title">Hassle-free cylinder booking with real-time delivery.</h1>
         <p class="hero-copy">
-            PIJP brings real-time stock, guided approvals, and rider assignment into one platform so
-            every order is tracked from request to doorstep.
+            PIJP keeps every order visible: live stock, instant approvals, and assigned riders so
+            customers always know when their cylinders arrive.
         </p>
         <div class="cta-group">
-            <a class="button" href="/register.php">Create account</a>
-            <a class="button secondary" href="/login.php">Sign in</a>
+            <a class="button" href="/register.php">Book your cylinder</a>
+            <a class="button secondary" href="/login.php">Customer login</a>
         </div>
         <div class="metrics">
             <div class="metric">
@@ -45,39 +45,123 @@ try {
             </div>
         </div>
     </div>
-    <div class="hero-visual">
-        <div class="hero-orb"></div>
-        <div class="hero-panel">
-            <h3>Service highlights</h3>
-            <ul class="feature-list">
-                <li>Fast approval workflows for admins</li>
-                <li>Live delivery status for customers</li>
-                <li>Verified rider assignment and contact</li>
-            </ul>
+    <div class="hero-media">
+        <div class="hero-image">
+            <div class="hero-image__badge">Safe SR-grade LPG</div>
+            <div class="hero-image__card">
+                <span>Delivery ETA</span>
+                <strong>45 mins</strong>
+            </div>
+            <div class="hero-image__card">
+                <span>Live Riders</span>
+                <strong>12 on duty</strong>
+            </div>
         </div>
         <div class="hero-panel">
-            <h3>Operations view</h3>
-            <p class="hero-copy">Track sales, stock movement, and delivery timelines in one dashboard.</p>
-            <span class="badge">Unified control center</span>
+            <h3>Smart cooking solutions</h3>
+            <p class="hero-copy">Transparent pricing, doorstep delivery, and verified riders.</p>
+            <ul class="feature-list">
+                <li>Easy online booking</li>
+                <li>Safety-first handling</li>
+                <li>Trusted service teams</li>
+            </ul>
         </div>
     </div>
 </section>
 
-<section>
-    <h2 class="section-title">What you can do</h2>
+<section class="section-block">
+    <div class="section-head">
+        <h2 class="section-title">I am looking for</h2>
+        <p class="hero-copy">Pick a quick path and get your cylinder delivered without delays.</p>
+    </div>
     <div class="grid">
         <div class="card">
-            <h3>Customers</h3>
-            <p class="hero-copy">Browse available tanks, place orders, and monitor delivery progress.</p>
+            <h3>New gas connection</h3>
+            <p class="hero-copy">Create an account, verify details, and place your first order.</p>
+            <a class="link-arrow" href="/register.php">Start now</a>
         </div>
         <div class="card">
-            <h3>Admins</h3>
-            <p class="hero-copy">Manage stock, approve orders, log offline sales, and review analytics.</p>
+            <h3>Refill order</h3>
+            <p class="hero-copy">Choose a tank size and schedule same-day delivery.</p>
+            <a class="link-arrow" href="/login.php">Book refill</a>
         </div>
         <div class="card">
-            <h3>Operations</h3>
-            <p class="hero-copy">Every order is tracked with status updates for complete transparency.</p>
+            <h3>Track my delivery</h3>
+            <p class="hero-copy">See status updates and assigned riders in real time.</p>
+            <a class="link-arrow" href="/user/orders.php">View orders</a>
         </div>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="section-head">
+        <h2 class="section-title">Our products</h2>
+        <p class="hero-copy">Reliable cylinders for every kitchen size and cooking demand.</p>
+    </div>
+    <div class="grid product-grid">
+        <div class="product-card">
+            <div class="product-image"></div>
+            <h3>12kg LPG Cylinder</h3>
+            <p class="hero-copy">For families and daily cooking routines.</p>
+            <span class="badge">Best seller</span>
+        </div>
+        <div class="product-card">
+            <div class="product-image is-compact"></div>
+            <h3>4kg LPG Cylinder</h3>
+            <p class="hero-copy">Compact and ideal for small homes.</p>
+            <span class="badge">Compact</span>
+        </div>
+        <div class="product-card">
+            <div class="product-image is-accessory"></div>
+            <h3>Safety Kit</h3>
+            <p class="hero-copy">Leak detector + regulator bundle.</p>
+            <span class="badge">Safety first</span>
+        </div>
+    </div>
+</section>
+
+<section class="section-block support-strip">
+    <div>
+        <h2 class="section-title">Always-on support</h2>
+        <p class="hero-copy">Need help? Our teams assist with delivery, safety tips, and order tracking.</p>
+    </div>
+    <div class="support-actions">
+        <div class="support-card">
+            <h3>Order assistance</h3>
+            <p class="hero-copy">Get help with booking, status, or delivery changes.</p>
+        </div>
+        <div class="support-card">
+            <h3>Safety guidance</h3>
+            <p class="hero-copy">Tips on safe storage and efficient cooking.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="section-head">
+        <h2 class="section-title">Get in touch</h2>
+        <p class="hero-copy">Share your details and our representative will reach out.</p>
+    </div>
+    <div class="card contact-card">
+        <form class="form contact-form" action="#" method="post">
+            <div>
+                <label for="contact_name">Name</label>
+                <input class="input" id="contact_name" name="contact_name" placeholder="Full name" type="text">
+            </div>
+            <div>
+                <label for="contact_phone">Mobile number</label>
+                <input class="input" id="contact_phone" name="contact_phone" placeholder="Phone number" type="tel">
+            </div>
+            <div>
+                <label for="contact_email">Email</label>
+                <input class="input" id="contact_email" name="contact_email" placeholder="you@email.com" type="email">
+            </div>
+            <div>
+                <label for="contact_message">Query / Feedback</label>
+                <textarea class="input" id="contact_message" name="contact_message" rows="4" placeholder="Tell us how we can help"></textarea>
+            </div>
+            <button class="button" type="button">Submit</button>
+        </form>
     </div>
 </section>
 
