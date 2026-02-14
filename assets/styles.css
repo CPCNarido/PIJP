@@ -858,27 +858,8 @@ textarea:focus {
         -webkit-overflow-scrolling: touch;
     }
 
-    .nav::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: -1;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: auto;
-    }
-
     .nav.active {
         transform: translateX(0);
-    }
-
-    .nav.active::before {
-        opacity: 1;
-        pointer-events: auto;
     }
 
     .nav a {
