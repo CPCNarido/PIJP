@@ -22,7 +22,8 @@ $config = require __DIR__ . '/../config.php';
                 <div class="brand-subtitle">Track cylinders. Control supply.</div>
             </div>
         </div>
-        <nav class="nav">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <nav class="nav" id="mainNav">
             <a href="/">Home</a>
             <?php if (!$user): ?>
                 <a href="/register.php">Register</a>

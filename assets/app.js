@@ -22,7 +22,39 @@ const initAddressAutocomplete = () => {
 
 window.initAddressAutocomplete = initAddressAutocomplete;
 
+// Mobile menu toggle
+const initMobileMenu = () => {
+    const menuBtn = document.getElementById('mobileMenuBtn');
+    const mainNav = document.getElementById('mainNav');
+    
+    if (!menuBtn || !mainNav) return;
+    
+    menuBtn.addEventListener('click', () => {
+        menuBtn.classList.toggle('active');
+        mainNav.classList.toggle('active');
+    });
+    
+    // Close menu when a link is clicked
+    const navLinks = mainNav.querySelectorAll('a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            menuBtn.classList.remove('active');
+            mainNav.classList.remove('active');
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.site-header')) {
+            menuBtn.classList.remove('active');
+            mainNav.classList.remove('active');
+        }
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    initMobileMenu();
+    
     const confirmButtons = document.querySelectorAll('[data-confirm]');
     confirmButtons.forEach((button) => {
         button.addEventListener('click', (event) => {
