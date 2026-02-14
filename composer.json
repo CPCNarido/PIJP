@@ -1,0 +1,8 @@
+{
+    "name": "pijp/gas-ordering",
+    "description": "LPG Gas Ordering System",
+    "type": "project",
+    "require": {
+        "cloudinary/cloudinary_php": "^2.0"
+    }
+}

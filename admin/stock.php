@@ -2,10 +2,23 @@
 require_once __DIR__ . '/../partials/header.php';
 require_admin();
 require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../lib/cloudinary.php';
 
 $pdo = db();
+$config = require __DIR__ . '/../config.php';
 
-$uploadDir = __DIR__ . '/../uploads/tanks';
+// Initialize Cloudinary
+$cloudinary = null;
+if (!empty($config['cloudinary']['cloud_name']) && 
+    !empty($config['cloudinary']['api_key']) && 
+    !empty($config['cloudinary']['api_secret'])) {
+    $cloudinary = new Cloudinary(
+        $config['cloudinary']['cloud_name'],
+        $config['cloudinary']['api_key'],
+        $config['cloudinary']['api_secret']
+    );
+}
+
 $allowedImageTypes = [
     'image/jpeg' => 'jpg',
     'image/png' => 'png',
@@ -35,21 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!array_key_exists($mimeType, $allowedImageTypes)) {
                 set_flash('error', 'Upload a JPG, PNG, or WEBP image.');
             } else {
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
+                try {
+                    if ($cloudinary) {
+                        // Upload to Cloudinary
+                        $result = $cloudinary->uploadImage($image['tmp_name'], [
+                            'folder' => 'pijp/tanks',
+                            'public_id' => 'tank_' . bin2hex(random_bytes(8)),
+                        ]);
+                        $imagePath = $result['secure_url'];
+                    } else {
+                        // Fallback to local upload if Cloudinary not configured
+                        $uploadDir = __DIR__ . '/../uploads/tanks';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
+                        }
+                        $filename = bin2hex(random_bytes(12)) . '.' . $allowedImageTypes[$mimeType];
+                        $targetPath = $uploadDir . '/' . $filename;
+                        if (!move_uploaded_file($image['tmp_name'], $targetPath)) {
+                            throw new Exception('Failed to save the image.');
+                        }
+                        $imagePath = '/uploads/tanks/' . $filename;
+                    }
 
-                $filename = bin2hex(random_bytes(12)) . '.' . $allowedImageTypes[$mimeType];
-                $targetPath = $uploadDir . '/' . $filename;
-
-                if (!move_uploaded_file($image['tmp_name'], $targetPath)) {
-                    set_flash('error', 'Failed to save the image.');
-                } else {
-                    $imagePath = '/uploads/tanks/' . $filename;
                     $stmt = $pdo->prepare('INSERT INTO gas_tanks (name, image_path, size_kg, price, available_qty) VALUES (:name, :image, :size, :price, :qty)');
                     $stmt->execute(['name' => $name, 'image' => $imagePath, 'size' => $size, 'price' => $price, 'qty' => $qty]);
                     set_flash('success', 'Tank added.');
                     redirect('/admin/stock.php');
+                } catch (Exception $e) {
+                    set_flash('error', 'Failed to upload image: ' . $e->getMessage());
                 }
             }
         }

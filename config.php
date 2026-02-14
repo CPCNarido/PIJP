@@ -28,5 +28,10 @@ return [
     'app_name' => getenv('APP_NAME') ?: 'PIJP Gas Ordering',
     'base_url' => getenv('APP_BASE_URL') ?: '/',
     'google_maps_key' => getenv('GOOGLE_MAPS_KEY') ?: '',
+    'cloudinary' => [
+        'cloud_name' => getenv('CLOUDINARY_CLOUD_NAME') ?: '',
+        'api_key' => getenv('CLOUDINARY_API_KEY') ?: '',
+        'api_secret' => getenv('CLOUDINARY_API_SECRET') ?: '',
+    ],
     'db' => $dbConfig,
 ];
