@@ -102,7 +102,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
         $stmt = $pdo->prepare('UPDATE gas_tanks SET active = 0 WHERE id = :id');
         $stmt->execute(['id' => $id]);
-        set_flash('success', 'Tank retired.');
+        set_flash('success', 'Product retired.');
+        redirect('/admin/stock.php');
+    }
+    
+    if ($action === 'permanent_delete') {
+        $id = (int) ($_POST['id'] ?? 0);
+        // Check if product is used in any orders
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM order_items WHERE gas_tank_id = :id');
+        $stmt->execute(['id' => $id]);
+        $count = (int) $stmt->fetchColumn();
+        
+        if ($count > 0) {
+            set_flash('error', 'Cannot delete product with existing orders. Retire it instead.');
+        } else {
+            $stmt = $pdo->prepare('DELETE FROM gas_tanks WHERE id = :id');
+            $stmt->execute(['id' => $id]);
+            set_flash('success', 'Product permanently deleted.');
+        }
         redirect('/admin/stock.php');
     }
 }
@@ -168,7 +185,13 @@ $tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, ava
                 </td>
                 <td><?php echo e((string) $tank['size_kg']); ?></td>
                 <td>PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?></td>
-                <td><?php echo e((string) $tank['available_qty']); ?></td>
+                <td>
+                    <?php if ($tank['available_qty'] <= 0): ?>
+                        <span class="status cancelled">Out of Stock</span>
+                    <?php else: ?>
+                        <?php echo e((string) $tank['available_qty']); ?>
+                    <?php endif; ?>
+                </td>
                 <td><?php echo $tank['active'] ? 'Yes' : 'No'; ?></td>
                 <td>
                     <form method="post" class="form" style="gap:6px">
@@ -181,10 +204,15 @@ $tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, ava
                         </label>
                         <button class="button" type="submit">Save</button>
                     </form>
-                    <form method="post">
+                    <form method="post" style="display: inline-block;">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="id" value="<?php echo e((string) $tank['id']); ?>">
-                        <button class="button danger" data-confirm="Retire this tank?" type="submit">Retire</button>
+                        <button class="button danger" data-confirm="Retire this product? It will be hidden but preserved for order history." type="submit">Retire</button>
+                    </form>
+                    <form method="post" style="display: inline-block;">
+                        <input type="hidden" name="action" value="permanent_delete">
+                        <input type="hidden" name="id" value="<?php echo e((string) $tank['id']); ?>">
+                        <button class="button danger" data-confirm="PERMANENTLY DELETE this product? This cannot be undone and will fail if used in orders." type="submit" style="background: #991b1b;">Delete</button>
                     </form>
                 </td>
             </tr>

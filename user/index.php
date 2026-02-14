@@ -8,11 +8,6 @@ $mapsKey = trim($config['google_maps_key'] ?? '');
 
 $pdo = db();
 
-// Get filter and search parameters
-$category = $_GET['category'] ?? 'all';
-$search = trim($_GET['search'] ?? '');
-$sort = $_GET['sort'] ?? 'name';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tank_id = (int) ($_POST['gas_tank_id'] ?? 0);
     $qty = (int) ($_POST['qty'] ?? 0);
@@ -23,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($tank_id <= 0 || $qty <= 0) {
-        set_flash('error', 'Please select a tank and quantity.');
+        set_flash('error', 'Please select a product and quantity.');
     } else if ($delivery_address === '') {
         set_flash('error', 'Please provide a delivery address.');
     } else if (mb_strlen($delivery_address) > 500) {
@@ -35,8 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['id' => $tank_id]);
             $tank = $stmt->fetch();
 
-            if (!$tank || (int) $tank['available_qty'] < $qty) {
-                throw new RuntimeException('Insufficient stock for this tank.');
+            if (!$tank) {
+                throw new RuntimeException('Product not found or no longer available.');
+            }
+
+            if ((int) $tank['available_qty'] <= 0) {
+                throw new RuntimeException('This product is out of stock.');
+            }
+
+            if ((int) $tank['available_qty'] < $qty) {
+                throw new RuntimeException('Insufficient stock. Only ' . $tank['available_qty'] . ' available.');
             }
 
             $stmt = $pdo->prepare('INSERT INTO orders (user_id, delivery_address, status, source) VALUES (:user_id, :address, :status, :source)');
@@ -76,68 +79,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Build query with filters
-$query = 'SELECT id, name, category, image_path, size_kg, price, available_qty FROM gas_tanks WHERE active = 1';
-$params = [];
-
-if ($category !== 'all' && in_array($category, ['gas', 'accessories', 'stove'])) {
-    $query .= ' AND category = :category';
-    $params['category'] = $category;
-}
-
-if ($search !== '') {
-    $query .= ' AND name LIKE :search';
-    $params['search'] = '%' . $search . '%';
-}
-
-// Add sorting
-switch ($sort) {
-    case 'price_low':
-        $query .= ' ORDER BY price ASC';
-        break;
-    case 'price_high':
-        $query .= ' ORDER BY price DESC';
-        break;
-    case 'name':
-        $query .= ' ORDER BY name ASC';
-        break;
-    default:
-        $query .= ' ORDER BY name ASC';
-}
-
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-$tanks = $stmt->fetchAll();
+$tanks = $pdo->query('SELECT id, name, category, image_path, size_kg, price, available_qty, UNIX_TIMESTAMP(created_at) as created_ts FROM gas_tanks WHERE active = 1')->fetchAll();
 ?>
 
 <h2 class="section-title">Available Products</h2>
 
 <div class="search-filter-bar">
-    <form method="get" action="/user/index.php" class="search-form">
-        <input type="text" name="search" class="search-input" placeholder="Search products..." value="<?php echo e($search); ?>">
-        <button type="submit" class="search-button">Search</button>
-    </form>
+    <div class="search-form">
+        <input type="text" class="search-input" placeholder="Search products...">
+    </div>
     
     <div class="filter-group">
-        <a href="?category=all&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'all' ? 'active' : ''; ?>">All</a>
-        <a href="?category=gas&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'gas' ? 'active' : ''; ?>">Gas</a>
-        <a href="?category=accessories&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'accessories' ? 'active' : ''; ?>">Accessories</a>
-        <a href="?category=stove&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'stove' ? 'active' : ''; ?>">Stove</a>
+        <a href="#" class="filter-btn active" data-category="all">All</a>
+        <a href="#" class="filter-btn" data-category="gas">Gas</a>
+        <a href="#" class="filter-btn" data-category="accessories">Accessories</a>
+        <a href="#" class="filter-btn" data-category="stove">Stove</a>
     </div>
     
     <div class="sort-group">
         <label for="sort" style="font-size: 14px; font-weight: 600; color: var(--muted);">Sort by:</label>
-        <select id="sort" class="sort-select" onchange="window.location.href='?category=<?php echo e($category); ?>&search=<?php echo urlencode($search); ?>&sort=' + this.value">
-            <option value="name" <?php echo $sort === 'name' ? 'selected' : ''; ?>>Name</option>
-            <option value="price_low" <?php echo $sort === 'price_low' ? 'selected' : ''; ?>>Price: Low to High</option>
-            <option value="price_high" <?php echo $sort === 'price_high' ? 'selected' : ''; ?>>Price: High to Low</option>
+        <select id="sort" class="sort-select">
+            <option value="name">Name</option>
+            <option value="price_low">Price: Low to High</option>
+            <option value="price_high">Price: High to Low</option>
         </select>
     </div>
 </div>
 
-<div class="grid">
+<div class="grid product-grid">
     <?php foreach ($tanks as $tank): ?>
-        <div class="card">
+        <div class="card product-card" 
+             data-category="<?php echo e($tank['category']); ?>" 
+             data-name="<?php echo e($tank['name']); ?>" 
+             data-price="<?php echo e($tank['price']); ?>"
+             data-date="<?php echo e($tank['created_ts']); ?>"
+             data-stock="<?php echo e($tank['available_qty']); ?>">
             <?php if (!empty($tank['image_path'])): ?>
                 <img class="tank-image" src="<?php echo e($tank['image_path']); ?>" alt="<?php echo e($tank['name']); ?>">
             <?php endif; ?>
@@ -145,7 +121,11 @@ $tanks = $stmt->fetchAll();
             <h3><?php echo e($tank['name']); ?></h3>
             <p class="hero-copy">Size: <?php echo e((string) $tank['size_kg']); ?> kg</p>
             <p class="hero-copy">Price: PHP <?php echo e((string) number_format((float) $tank['price'], 2)); ?></p>
-            <p class="badge">Stock: <?php echo e((string) $tank['available_qty']); ?></p>
+            <?php if ($tank['available_qty'] <= 0): ?>
+                <p class="badge" style="background: var(--danger); color: white;">Out of Stock</p>
+            <?php else: ?>
+                <p class="badge">Stock: <?php echo e((string) $tank['available_qty']); ?></p>
+            <?php endif; ?>
         </div>
     <?php endforeach; ?>
 </div>

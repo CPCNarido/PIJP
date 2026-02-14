@@ -9,50 +9,13 @@ $metrics = [
 ];
 $products = [];
 
-// Get filter and search parameters
-$category = $_GET['category'] ?? 'all';
-$search = trim($_GET['search'] ?? '');
-$sort = $_GET['sort'] ?? 'newest';
-
 try {
     $pdo = db();
     $metrics['tanks'] = (int) $pdo->query('SELECT COUNT(*) FROM gas_tanks WHERE active = 1')->fetchColumn();
     $metrics['orders'] = (int) $pdo->query("SELECT COUNT(*) FROM orders WHERE status IN ('approved','delivered')")->fetchColumn();
     $metrics['users'] = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
     
-    // Build query with filters
-    $query = 'SELECT id, name, category, image_path, size_kg, price FROM gas_tanks WHERE active = 1';
-    $params = [];
-    
-    if ($category !== 'all' && in_array($category, ['gas', 'accessories', 'stove'])) {
-        $query .= ' AND category = :category';
-        $params['category'] = $category;
-    }
-    
-    if ($search !== '') {
-        $query .= ' AND name LIKE :search';
-        $params['search'] = '%' . $search . '%';
-    }
-    
-    // Add sorting
-    switch ($sort) {
-        case 'price_low':
-            $query .= ' ORDER BY price ASC';
-            break;
-        case 'price_high':
-            $query .= ' ORDER BY price DESC';
-            break;
-        case 'name':
-            $query .= ' ORDER BY name ASC';
-            break;
-        default:
-            $query .= ' ORDER BY created_at DESC';
-    }
-    
-    $query .= ' LIMIT 12';
-    
-    $stmt = $pdo->prepare($query);
-    $stmt->execute($params);
+    $stmt = $pdo->query('SELECT id, name, category, image_path, size_kg, price, available_qty, UNIX_TIMESTAMP(created_at) as created_ts FROM gas_tanks WHERE active = 1');
     $products = $stmt->fetchAll();
 } catch (Throwable $e) {
     // Database not configured yet.
@@ -141,25 +104,24 @@ try {
     </div>
     
     <div class="search-filter-bar">
-        <form method="get" action="/index.php" class="search-form">
-            <input type="text" name="search" class="search-input" placeholder="Search products..." value="<?php echo e($search); ?>">
-            <button type="submit" class="search-button">Search</button>
-        </form>
+        <div class="search-form">
+            <input type="text" class="search-input" placeholder="Search products...">
+        </div>
         
         <div class="filter-group">
-            <a href="?category=all&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'all' ? 'active' : ''; ?>">All</a>
-            <a href="?category=gas&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'gas' ? 'active' : ''; ?>">Gas</a>
-            <a href="?category=accessories&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'accessories' ? 'active' : ''; ?>">Accessories</a>
-            <a href="?category=stove&search=<?php echo urlencode($search); ?>&sort=<?php echo e($sort); ?>" class="filter-btn <?php echo $category === 'stove' ? 'active' : ''; ?>">Stove</a>
+            <a href="#" class="filter-btn active" data-category="all">All</a>
+            <a href="#" class="filter-btn" data-category="gas">Gas</a>
+            <a href="#" class="filter-btn" data-category="accessories">Accessories</a>
+            <a href="#" class="filter-btn" data-category="stove">Stove</a>
         </div>
         
         <div class="sort-group">
             <label for="sort" style="font-size: 14px; font-weight: 600; color: var(--muted);">Sort by:</label>
-            <select id="sort" class="sort-select" onchange="window.location.href='?category=<?php echo e($category); ?>&search=<?php echo urlencode($search); ?>&sort=' + this.value">
-                <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Newest</option>
-                <option value="name" <?php echo $sort === 'name' ? 'selected' : ''; ?>>Name</option>
-                <option value="price_low" <?php echo $sort === 'price_low' ? 'selected' : ''; ?>>Price: Low to High</option>
-                <option value="price_high" <?php echo $sort === 'price_high' ? 'selected' : ''; ?>>Price: High to Low</option>
+            <select id="sort" class="sort-select">
+                <option value="newest">Newest</option>
+                <option value="name">Name</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
             </select>
         </div>
     </div>
@@ -168,7 +130,12 @@ try {
             <div class="card">No products available yet. Please check back soon.</div>
         <?php else: ?>
             <?php foreach ($products as $product): ?>
-                <div class="product-card">
+                <div class="product-card" 
+                     data-category="<?php echo e($product['category']); ?>" 
+                     data-name="<?php echo e($product['name']); ?>" 
+                     data-price="<?php echo e($product['price']); ?>"
+                     data-date="<?php echo e($product['created_ts']); ?>"
+                     data-stock="<?php echo e($product['available_qty']); ?>">
                     <div class="product-image">
                         <?php if (!empty($product['image_path'])): ?>
                             <img src="<?php echo e($product['image_path']); ?>" alt="<?php echo e($product['name']); ?>">
@@ -177,7 +144,11 @@ try {
                     <span class="product-category"><?php echo e(ucfirst($product['category'])); ?></span>
                     <h3><?php echo e($product['name']); ?></h3>
                     <p class="hero-copy"><?php echo e((string) $product['size_kg']); ?> kg · PHP <?php echo e((string) number_format((float) $product['price'], 2)); ?></p>
-                    <span class="badge">Available</span>
+                    <?php if ($product['available_qty'] <= 0): ?>
+                        <span class="badge" style="background: var(--danger); color: white;">Out of Stock</span>
+                    <?php else: ?>
+                        <span class="badge">Available</span>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>

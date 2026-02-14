@@ -31,8 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['id' => $tank_id]);
             $tank = $stmt->fetch();
 
-            if (!$tank || (int) $tank['available_qty'] < $qty) {
-                throw new RuntimeException('Insufficient stock for this tank.');
+            if (!$tank) {
+                throw new RuntimeException('Product not found or no longer available.');
+            }
+
+            if ((int) $tank['available_qty'] <= 0) {
+                throw new RuntimeException('This product is out of stock.');
+            }
+
+            if ((int) $tank['available_qty'] < $qty) {
+                throw new RuntimeException('Insufficient stock. Only ' . $tank['available_qty'] . ' available.');
             }
 
             $stmt = $pdo->prepare('INSERT INTO orders (customer_name, customer_email, delivery_address, status, source) VALUES (:name, :email, :address, :status, :source)');
