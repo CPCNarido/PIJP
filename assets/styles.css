@@ -1281,12 +1281,15 @@ textarea:focus {
 }
 
 .button-secondary {
-    background: var(--muted);
-    color: white;
+    background: transparent;
+    color: var(--secondary);
+    border: 2px solid var(--border);
 }
 
 .button-secondary:hover {
-    background: var(--secondary);
+    background: var(--surface-muted);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 @media (max-width: 968px) {

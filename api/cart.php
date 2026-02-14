@@ -1,9 +1,15 @@
 <?php
-require_once __DIR__ . '/../partials/header.php';
-require_login();
+require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../db.php';
 
 header('Content-Type: application/json');
+
+// Check authentication for API
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
 
 $pdo = db();
 $action = $_GET['action'] ?? '';
